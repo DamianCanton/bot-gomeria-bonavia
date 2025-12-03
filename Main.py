@@ -11,7 +11,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, fil
 # --- 1. CONFIGURACIÓN ---
 # Render nos da el puerto por variable de entorno, o usamos 10000 por defecto
 PORT = int(os.environ.get('PORT', 10000))
-TOKEN = os.environ.get("7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE") # Leemos el token de la configuración de Render
+TOKEN = "7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE" # Leemos el token de la configuración de Render
 
 # Reglas de Negocio
 MARCAS_VIP = ["dunlop", "fate", "corven"]
