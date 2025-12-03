@@ -120,12 +120,21 @@ def index():
     </html>
     """
 
-# --- 5. EL ARRANQUE ---
-if __name__ == '__main__':
-    # Prendemos el Bot en un hilo paralelo (Background)
-    bot_thread = threading.Thread(target=run_bot)
-    bot_thread.start()
+# --- 5. EL ARRANQUE INVERTIDO (Solución al error de Asyncio) ---
+def run_flask():
+    # Esta función corre el servidor web en segundo plano
+    app.run(host='0.0.0.0', port=PORT)
+
+if __name__ == '__main__ ':
+    # 1. Prendemos el servidor Web en un hilo paralelo (Background)
+    #    Lo ponemos como 'daemon' para que se apague si el bot se apaga.
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
     
-    # Prendemos la Web en el hilo principal (Para que Render la vea)
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port)
+    print("🚀 Servidor Web iniciado en background...")
+    
+    # 2. Prendemos el Bot en el Hilo Principal (Main Thread)
+    #    Esto satisface a Asyncio y evita el RuntimeError.
+    print("🤖 Iniciando Bot de Telegram en Main Thread...")
+    run_bot()
