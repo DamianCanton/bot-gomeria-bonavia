@@ -95,7 +95,7 @@ def run_bot():
     application.run_polling()
 
 ## --- 4. LA FACHADA (El Servidor Web con HTML Básico) ---
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route('/')
 def index():
