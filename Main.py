@@ -35,6 +35,12 @@ logging.basicConfig(
 
 # --- 2. LÓGICA DE NEGOCIO (EL CEREBRO) ---
 
+def formatear_precio(valor):
+    """
+    Formatea un número float a string con formato moneda: $1.234,56
+    """
+    return f"${valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
 def filtrar_por_rodado(query_usuario, lista_productos):
     """
     Filtra una lista de neumáticos asegurando que coincidan con el rodado (R)
@@ -159,18 +165,17 @@ def buscar_multiples_opciones(medida):
             icon = "⭐" if p['vip'] else "🔹"
             ganancia = p['venta'] - p['costo']
             msg_interno += (f"{i}. {icon} {p['titulo']}\n"
-                            f"   📉 Costo: ${p['costo']:,.0f} | 💰 Gana: ${ganancia:,.0f}\n"
-                            f"   🏷️ Venta: ${p['venta']:,.0f}\n\n")
+                            f"   📉 Costo: {formatear_precio(p['costo'])} | 💰 Gana: {formatear_precio(ganancia)}\n"
+                            f"   🏷️ Venta: {formatear_precio(p['venta'])}\n\n")
             
         # 2. Cotización Cliente
         msg_cliente = f"👋 Hola! Te paso las opciones para {medida}:\n\n"
         
         for p in productos:
             msg_cliente += f"🔘 {p['titulo']}\n"
-            msg_cliente += f"   💲 Precio Final: ${p['venta']:,.0f}\n\n"
+            msg_cliente += f"   💲 Precio Final: {formatear_precio(p['venta'])}\n\n"
             
         msg_cliente += "✅ Precios contado/transferencia.\n"
-        msg_cliente += "📍 Avisame cual te reservo."
 
         return msg_interno, msg_cliente
 
