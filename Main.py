@@ -16,11 +16,11 @@ from telegram.ext import (
     ContextTypes
 )
 
-TOKEN_TELEGRAM = 7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE
+
 
 # --- 1. CONFIGURACIÓN ---
 # Token: Render lo inyecta como variable de entorno
-TOKEN = os.environ.get("TOKEN_TELEGRAM")
+TOKEN = '7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE'
 PORT = int(os.environ.get('PORT', 10000))
 
 # Reglas de Negocio
