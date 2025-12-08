@@ -190,7 +190,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(msg_cliente)
 
 # --- 4. SERVIDOR WEB FALSO (PARA RENDER) ---
-app = Flask(_name_)
+app = Flask(__name__)
 
 @app.route('/')
 def index():
