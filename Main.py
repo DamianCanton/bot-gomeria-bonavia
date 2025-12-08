@@ -18,7 +18,7 @@ from telegram.ext import (
 
 # --- 1. CONFIGURACIÓN ---
 # Token: Render lo inyecta como variable de entorno
-TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TOKEN = os.environ.get("7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE")
 PORT = int(os.environ.get('PORT', 10000))
 
 # Reglas de Negocio
