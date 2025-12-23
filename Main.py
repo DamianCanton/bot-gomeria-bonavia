@@ -70,13 +70,36 @@ def cotizar_producto_individual(url):
             costo = precio_raw * (1 - desc)
             venta = costo * MARGEN_GANANCIA
             
-            # --- Detección de Stock ---
-            stock = -1 # Por defecto: No sabemos
-            if any(kw in texto.lower() for kw in ["agotado", "sin stock", "no hay stock", "sin unidades"]):
+            # --- Detección de Stock (MEJORADA) ---
+            stock = -1  # Por defecto: No sabemos
+            
+            # Búsqueda más precisa de estados de agotamiento
+            # Usamos \b (word boundary) para buscar palabras completas, no parciales
+            texto_lower = texto.lower()
+            
+            # Patrones de producto agotado (solo frases específicas)
+            patrones_agotado = [
+                r'\bagotado\b',
+                r'\bsin\s+stock\b',
+                r'\bno\s+(?:hay|tiene|disponible|queda)\s+stock\b',
+                r'\bno\s+disponible\b',
+                r'\bsin\s+unidades\b',
+                r'\bno\s+hay\s+unidades\b',
+                r'\bstock:\s*0\b',
+                r'\bdisponibilidad:\s*no\b'
+            ]
+            
+            # Si encontramos algún patrón de agotado
+            if any(re.search(patron, texto_lower) for patron in patrones_agotado):
                 stock = 0
             else:
-                # Intenta buscar "X unidades disponibles"
-                stock_match = re.search(r'(\d+)\s+unidades?\s+disponible', texto, re.IGNORECASE)
+                # Intenta buscar "X unidades disponibles" o "Stock: X"
+                stock_match = re.search(r'(\d+)\s+unidades?\s+disponibles?', texto_lower)
+                if not stock_match:
+                    stock_match = re.search(r'stock:\s*(\d+)', texto_lower)
+                if not stock_match:
+                    stock_match = re.search(r'disponibles?:\s*(\d+)', texto_lower)
+                    
                 if stock_match:
                     stock = int(stock_match.group(1))
 
