@@ -44,12 +44,24 @@ def formatear_precio(valor):
     return f"${valor:,.0f}".replace(",", ".")
 
 def cotizar_producto_individual(url):
-    """ Entra a un link y saca la data precisa """
+    """ Entra a un link y saca la data precisa (Versión Corregida) """
     headers = {'User-Agent': 'Mozilla/5.0'}
     try:
         resp = requests.get(url, headers=headers, timeout=5)
         soup = BeautifulSoup(resp.text, 'html.parser')
-        texto = soup.get_text(" ", strip=True)
+        
+        # --- CORRECCIÓN 1: ACORTAR EL ÁREA DE BÚSQUEDA ---
+        # Buscamos el contenedor específico del producto para evitar leer el footer o sugeridos.
+        # TiendaNube usa comúnmente 'js-product-container' o 'product-container'
+        contenedor = soup.find(class_='js-product-container')
+        if not contenedor:
+            contenedor = soup.find(id='product-container')
+        if not contenedor:
+            # Si falla, usamos 'main' o fallback a todo el soup
+            contenedor = soup.find('main') or soup
+
+        # Ahora sacamos texto SOLO de ese sector
+        texto = contenedor.get_text(" ", strip=True)
         
         # Filtro Estricto: Busca precio pegado a "con Transferencia"
         match = re.search(r'(\$\s?[\d\.]+,\d{2})\s+con\s+Transferencia', texto, re.IGNORECASE)
@@ -70,38 +82,39 @@ def cotizar_producto_individual(url):
             costo = precio_raw * (1 - desc)
             venta = costo * MARGEN_GANANCIA
             
-            # --- Detección de Stock (MEJORADA) ---
+            # --- Detección de Stock (MEJORADA v2) ---
             stock = -1  # Por defecto: No sabemos
-            
-            # Búsqueda más precisa de estados de agotamiento
-            # Usamos \b (word boundary) para buscar palabras completas, no parciales
             texto_lower = texto.lower()
             
-            # Patrones de producto agotado (solo frases específicas)
-            patrones_agotado = [
-                r'\bagotado\b',
-                r'\bsin\s+stock\b',
-                r'\bno\s+(?:hay|tiene|disponible|queda)\s+stock\b',
-                r'\bno\s+disponible\b',
-                r'\bsin\s+unidades\b',
-                r'\bno\s+hay\s+unidades\b',
-                r'\bstock:\s*0\b',
-                r'\bdisponibilidad:\s*no\b'
+            # 1. Primero buscamos stock POSITIVO (Prioridad)
+            # Agregamos el patrón "quedan X en stock" que usa Gomería Central
+            patrones_stock = [
+                r'quedan\s+(\d+)\s+en\s+stock',       # "Solo quedan 39 en stock"
+                r'stock:\s*(\d+)',
+                r'(\d+)\s+unidades?\s+disponibles?',
+                r'disponibles?:\s*(\d+)'
             ]
-            
-            # Si encontramos algún patrón de agotado
-            if any(re.search(patron, texto_lower) for patron in patrones_agotado):
-                stock = 0
-            else:
-                # Intenta buscar "X unidades disponibles" o "Stock: X"
-                stock_match = re.search(r'(\d+)\s+unidades?\s+disponibles?', texto_lower)
-                if not stock_match:
-                    stock_match = re.search(r'stock:\s*(\d+)', texto_lower)
-                if not stock_match:
-                    stock_match = re.search(r'disponibles?:\s*(\d+)', texto_lower)
-                    
+
+            stock_encontrado = False
+            for patron in patrones_stock:
+                stock_match = re.search(patron, texto_lower)
                 if stock_match:
                     stock = int(stock_match.group(1))
+                    stock_encontrado = True
+                    break # Si encontramos stock, dejamos de buscar
+            
+            # 2. Si NO encontramos número, buscamos señales de AGOTADO
+            if not stock_encontrado:
+                patrones_agotado = [
+                    r'\bagotado\b',
+                    r'\bsin\s+stock\b',
+                    r'\bno\s+(?:hay|tiene|disponible|queda)\s+stock\b',
+                    r'\bno\s+disponible\b',
+                    r'\bstock:\s*0\b'
+                ]
+                # Solo marcamos 0 si realmente encontramos la palabra CLAVE en el contenedor del producto
+                if any(re.search(patron, texto_lower) for patron in patrones_agotado):
+                    stock = 0
 
             return {
                 "titulo": titulo,
