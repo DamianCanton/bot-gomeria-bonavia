@@ -20,7 +20,7 @@ from telegram.ext import (
 
 # --- 1. CONFIGURACIÓN ---
 # Token: Render lo inyecta como variable de entorno
-TOKEN = '7890020254:AAH8Arv39q57dIdWC0zYN4qpWvijSN2LMcE'
+TOKEN = '8222498081:AAEuL85-S8k4fe2sTYeCR4a4ZULl7AVBDGA'
 PORT = int(os.environ.get('PORT', 10000))
 
 # Reglas de Negocio
