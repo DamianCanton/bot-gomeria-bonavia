@@ -1,0 +1,5 @@
+python-telegram-bot
+flask
+requests
+beautifulsoup4
+python-decouple
